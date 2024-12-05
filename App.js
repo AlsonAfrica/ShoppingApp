@@ -1,11 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './redux/store';
 import ShoppingListScreen from './screens/ShoppingListScreen';
+import SplashScreen from './screens/splashScreen';
 import { SafeAreaView, StyleSheet } from 'react-native';
 
 const App = () => {
+  const [splashComplete, setSplashComplete] = useState(false);
+
+  const handleSplashComplete = () => {
+    setSplashComplete(true);
+  };
+
+  // If splash screen hasn't completed, show the SplashScreen
+  if (!splashComplete) {
+    return <SplashScreen onAnimationComplete={handleSplashComplete} />;
+  }
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>

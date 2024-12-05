@@ -21,6 +21,7 @@ export const saveShoppingList = createAsyncThunk(
   async (items) => {
     try {
       await AsyncStorage.setItem('shoppingList', JSON.stringify(items));
+      console.log('items saved')
       return items;
     } catch (error) {
       console.error('Error saving shopping list:', error);

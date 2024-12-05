@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import EditItemModal from '../Components/EditItemModal';
 import ShoppingListItem from '../Components/ShoppingItem';
 import AddItemModal from '../Components/AddItemModal';
+import Toast from 'react-native-toast-message';
 
 const ShoppingListScreen = () => {
   const [addModalVisible, setAddModalVisible] = useState(false);
@@ -58,6 +59,7 @@ const ShoppingListScreen = () => {
           onClose={() => setEditItem(null)}
         />
       )}
+      <Toast/>
     </View>
   );
 };

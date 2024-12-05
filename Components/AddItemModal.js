@@ -9,6 +9,9 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { addItem } from '../redux/slices/shoppingListSlice';
+import Toast from 'react-native-toast-message';
+
+
 
 const AddItemModal = ({ visible, onClose }) => {
   const [itemName, setItemName] = useState('');
@@ -21,6 +24,14 @@ const AddItemModal = ({ visible, onClose }) => {
         name: itemName.trim(),
         quantity: parseInt(quantity) || 1
       }));
+
+      Toast.show({
+        type: 'success',
+        text1: 'Item saved',
+        text2: `Item ${itemName} Saved`,
+        position: 'top',
+      });
+
       // Reset fields
       setItemName('');
       setQuantity('1');

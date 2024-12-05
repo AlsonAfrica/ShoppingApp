@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { editItem } from '../redux/slices/shoppingListSlice';
+import Toast from 'react-native-toast-message';
+
 
 const EditItemModal = ({ item, onClose }) => {
   const [itemName, setItemName] = useState('');
@@ -29,6 +31,12 @@ const EditItemModal = ({ item, onClose }) => {
         name: itemName.trim(),
         quantity: parseInt(quantity) || 1
       }));
+      Toast.show({
+        type: 'success',
+        text1: 'Item Editted',
+        text2: `Item ${itemName} Editted Successfully`,
+        position: 'top',
+      });
       onClose();
     }
   };

@@ -12,7 +12,7 @@ const shoppingListSlice = createSlice({
         id: uuid.v4(),
         name: action.payload.name,
         quantity: action.payload.quantity || 1,
-        purchased: false
+        purchased: false,
       });
     },
     editItem: (state, action) => {

@@ -10,7 +10,9 @@ import {
   deleteItem, 
   togglePurchased 
 } from '../redux/slices/shoppingListSlice';
+import Toast from 'react-native-toast-message';
 
+// ITEM LIST CHECKBOX
 const Checkbox = ({ checked }) => (
   <View style={[
     styles.checkbox, 
@@ -20,15 +22,25 @@ const Checkbox = ({ checked }) => (
   </View>
 );
 
+// RECEIVED PROPS
 const ShoppingListItem = ({ item, onEdit }) => {
   const dispatch = useDispatch();
 
   const handleTogglePurchased = () => {
     dispatch(togglePurchased(item.id));
+    
   };
 
   const handleDelete = () => {
     dispatch(deleteItem(item.id));
+
+    
+    Toast.show({
+      type: 'success',
+      text1: 'Item Deleted',
+      text2: `Item ${item.name} Deleted Successfully`,
+      position: 'top',
+    });
   };
 
   return (
@@ -78,7 +90,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
   itemContent: {
     flex: 1,
