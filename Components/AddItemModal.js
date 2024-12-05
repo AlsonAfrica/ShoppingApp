@@ -5,13 +5,12 @@ import {
   Text, 
   TextInput, 
   TouchableOpacity, 
-  StyleSheet 
+  StyleSheet,
+  Alert
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { addItem } from '../redux/slices/shoppingListSlice';
 import Toast from 'react-native-toast-message';
-
-
 
 const AddItemModal = ({ visible, onClose }) => {
   const [itemName, setItemName] = useState('');
@@ -19,24 +18,47 @@ const AddItemModal = ({ visible, onClose }) => {
   const dispatch = useDispatch();
 
   const handleAddItem = () => {
-    if (itemName.trim()) {
+    // Enhanced validation
+    if (!itemName.trim()) {
+      Alert.alert('Invalid Input', 'Please enter an item name');
+      return;
+    }
+
+    const parsedQuantity = parseInt(quantity);
+    if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+      Alert.alert('Invalid Quantity', 'Please enter a valid quantity');
+      return;
+    }
+
+    try {
       dispatch(addItem({
         name: itemName.trim(),
-        quantity: parseInt(quantity) || 1
+        quantity: parsedQuantity
       }));
 
       Toast.show({
         type: 'success',
-        text1: 'Item saved',
-        text2: `Item ${itemName} Saved`,
+        text1: 'Item Added',
+        text2: `${parsedQuantity} x ${itemName} added to list`,
         position: 'top',
       });
 
-      // Reset fields
-      setItemName('');
-      setQuantity('1');
-      onClose();
+      // Reset fields and close modal
+      resetForm();
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to add item',
+        position: 'top',
+      });
     }
+  };
+
+  const resetForm = () => {
+    setItemName('');
+    setQuantity('1');
+    onClose();
   };
 
   return (
@@ -55,6 +77,7 @@ const AddItemModal = ({ visible, onClose }) => {
             placeholder="Item Name"
             value={itemName}
             onChangeText={setItemName}
+            maxLength={50} // Limit item name length
           />
           
           <TextInput
@@ -62,15 +85,19 @@ const AddItemModal = ({ visible, onClose }) => {
             placeholder="Quantity"
             keyboardType="numeric"
             value={quantity}
-            onChangeText={setQuantity}
+            onChangeText={(text) => {
+              // Only allow numeric input
+              const numericText = text.replace(/[^0-9]/g, '');
+              setQuantity(numericText);
+            }}
           />
           
           <View style={styles.buttonContainer}>
             <TouchableOpacity 
               style={[styles.button, styles.cancelButton]} 
-              onPress={onClose}
+              onPress={resetForm}
             >
-              <Text style={styles.buttonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -85,6 +112,7 @@ const AddItemModal = ({ visible, onClose }) => {
     </Modal>
   );
 };
+
 
 const styles = StyleSheet.create({
   centeredView: {
@@ -119,6 +147,15 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     borderRadius: 5
+  },
+  inputNotes:{
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+    height:200,
+    textAlign:"center"
   },
   buttonContainer: {
     flexDirection: 'row',

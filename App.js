@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { Provider } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { Provider, useDispatch } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './redux/store';
 import ShoppingListScreen from './screens/ShoppingListScreen';
 import SplashScreen from './screens/splashScreen';
 import { SafeAreaView, StyleSheet } from 'react-native';
+
+
 
 const App = () => {
   const [splashComplete, setSplashComplete] = useState(false);

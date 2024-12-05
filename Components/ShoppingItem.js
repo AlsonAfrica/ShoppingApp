@@ -11,6 +11,7 @@ import {
   togglePurchased 
 } from '../redux/slices/shoppingListSlice';
 import Toast from 'react-native-toast-message';
+import { Alert } from 'react-native';
 
 // ITEM LIST CHECKBOX
 const Checkbox = ({ checked }) => (
@@ -32,16 +33,38 @@ const ShoppingListItem = ({ item, onEdit }) => {
   };
 
   const handleDelete = () => {
-    dispatch(deleteItem(item.id));
-
-    
-    Toast.show({
-      type: 'success',
-      text1: 'Item Deleted',
-      text2: `Item ${item.name} Deleted Successfully`,
-      position: 'top',
-    });
+    Alert.alert(
+      'Confirm Deletion',
+      `Are you sure you want to delete ${item.name}?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            // Dispatch the delete action
+            dispatch(deleteItem(item.id));
+  
+            // Show the success toast
+            Toast.show({
+              type: 'success',
+              text1: 'Item Deleted',
+              text2: `Item ${item.name} deleted successfully.`,
+              position: 'top',
+            });
+  
+            // Optionally, you can also save the updated list to AsyncStorage
+            // saveToStorage();
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
+  
 
   return (
     <View style={styles.container}>
