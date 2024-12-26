@@ -1,132 +1,359 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  StyleSheet, 
-  TouchableOpacity, 
-  StatusBar
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  Modal,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import EditItemModal from '../Components/EditItemModal';
-import ShoppingListItem from '../Components/ShoppingItem';
-import AddItemModal from '../Components/AddItemModal';
-import Toast from 'react-native-toast-message';
-import { loadShoppingList } from '../redux/actions/shoppingListActions';
+import { addItem, updateItem, deleteItem, toggleItemCompleted, setItems } from '../redux/ShoppingListSlice';
+import { saveItemsToStorage, getItemsFromStorage } from '../utils/asyncStorageHelpers';
+import ShoppingItem from '../Components/ShoppingItem';
 
 const ShoppingListScreen = () => {
-  const [addModalVisible, setAddModalVisible] = useState(false);
-  const [editItem, setEditItem] = useState(null);
-  const [loading, setLoading] = useState(true); // To track loading state
-  const [error, setError] = useState(null); // To track errors
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentItemId, setCurrentItemId] = useState(null);
+  const [itemName, setItemName] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [price, setPrice] = useState('');
+  const [priorityColor, setPriorityColor] = useState('');
+  const [notes, setNotes] = useState('');
+  
+  const shoppingList = useSelector(state => state.shopping);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const fetchShoppingList = async () => {
-      try {
-        setLoading(true); // Set loading to true before fetching data
-        dispatch(loadShoppingList(shoppingItems));
-        setLoading(false); // Set loading to false after fetching is complete
-      } catch (err) {
-        setLoading(false);
-        setError('Failed to load shopping list');
-        console.error(err);
-      }
+    const loadItems = async () => {
+      const items = await getItemsFromStorage();
+      dispatch(setItems(items));
     };
+    loadItems();
+  }, []);
 
-    fetchShoppingList(); // Call the function to load the shopping list
-  }, [dispatch]);
+  useEffect(() => {
+    saveItemsToStorage(shoppingList);
+  }, [shoppingList]);
 
-  const shoppingItems = useSelector(state => state.shoppingList.items);
+  const handleAddItem = () => {
+    if (itemName.trim() && quantity && price) {
+      dispatch(
+        addItem({
+          id: Date.now().toString(),
+          name: itemName.trim(),
+          quantity: parseInt(quantity, 10),
+          price: parseFloat(price),
+          priorityColor,
+          notes,
+        })
+      );
+      setIsModalVisible(false);
+      resetForm();
+    }
+  };
 
-  const renderItem = ({ item }) => (
-    <ShoppingListItem 
-      item={item} 
-      onEdit={() => setEditItem(item)}
-    />
+  const handleEditItem = (id, name, quantity, price, priorityColor, notes) => {
+    setCurrentItemId(id);
+    setItemName(name);
+    setQuantity(quantity.toString());
+    setPrice(price.toString());
+    setPriorityColor(priorityColor);
+    setNotes(notes);
+    setIsEditing(true);
+    setIsModalVisible(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (itemName.trim() && quantity && price) {
+      dispatch(
+        updateItem({
+          id: currentItemId,
+          name: itemName.trim(),
+          quantity: parseInt(quantity, 10),
+          price: parseFloat(price),
+          priorityColor,
+          notes,
+        })
+      );
+      setIsModalVisible(false);
+      resetForm();
+      setIsEditing(false);
+    }
+  };
+
+  const handleDeleteItem = (id) => {
+    dispatch(deleteItem(id));
+  };
+
+  const handleToggleCompleted = (id) => {
+    dispatch(toggleItemCompleted(id));
+  };
+
+  const resetForm = () => {
+    setItemName('');
+    setQuantity('');
+    setPrice('');
+    setPriorityColor('');
+    setNotes('');
+  };
+
+  const renderEmptyList = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>Your shopping list is empty</Text>
+      <Text style={styles.emptySubText}>Tap the + button to add items</Text>
+    </View>
   );
 
-  // Handle loading and error states
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Loading...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>{error}</Text>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <StatusBar style="Dark"/>
-      <Text style={styles.title}>Shopping List</Text>
-      
-      <FlatList
-        data={shoppingItems}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        ListEmptyComponent={
-          <Text style={styles.emptyListText}>
-            No items in your shopping list
-          </Text>
-        }
-      />
-      
-      <TouchableOpacity 
-        style={styles.addButton}
-        onPress={() => setAddModalVisible(true)}
-      >
-        <Text style={styles.addButtonText}>+ Add Item</Text>
-      </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Shopping List</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              setIsModalVisible(true);
+              setIsEditing(false);
+            }}
+          >
+            <Text style={styles.addButtonText}>+</Text>
+          </TouchableOpacity>
+        </View>
 
-      <AddItemModal
-        visible={addModalVisible}
-        onClose={() => setAddModalVisible(false)}
-      />
-      
-      {editItem && (
-        <EditItemModal
-          item={editItem}
-          onClose={() => setEditItem(null)}
+        <FlatList
+          data={shoppingList}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <ShoppingItem
+              item={item}
+              onDelete={handleDeleteItem}
+              onEdit={handleEditItem}
+              onToggleCompleted={handleToggleCompleted}
+            />
+          )}
+          ListEmptyComponent={renderEmptyList}
+          contentContainerStyle={styles.listContainer}
         />
-      )}
-      <Toast />
-    </View>
+
+        <Modal
+          visible={isModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setIsModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                {isEditing ? 'Edit Item' : 'Add New Item'}
+              </Text>
+              
+              <TextInput
+                style={styles.input}
+                placeholder="Item Name"
+                value={itemName}
+                onChangeText={setItemName}
+                placeholderTextColor="#94a3b8"
+              />
+              
+              <View style={styles.row}>
+                <TextInput
+                  style={[styles.input, styles.halfInput]}
+                  placeholder="Quantity"
+                  value={quantity}
+                  onChangeText={setQuantity}
+                  keyboardType="numeric"
+                  placeholderTextColor="#94a3b8"
+                />
+                
+                <TextInput
+                  style={[styles.input, styles.halfInput]}
+                  placeholder="Price"
+                  value={price}
+                  onChangeText={setPrice}
+                  keyboardType="numeric"
+                  placeholderTextColor="#94a3b8"
+                />
+              </View>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Priority Color (e.g., red, green)"
+                value={priorityColor}
+                onChangeText={setPriorityColor}
+                placeholderTextColor="#94a3b8"
+              />
+
+              <TextInput
+                style={[styles.input, styles.notesInput]}
+                placeholder="Additional Notes"
+                value={notes}
+                onChangeText={setNotes}
+                multiline
+                placeholderTextColor="#94a3b8"
+              />
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={() => {
+                    setIsModalVisible(false);
+                    resetForm();
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.saveButton]}
+                  onPress={isEditing ? handleSaveEdit : handleAddItem}
+                >
+                  <Text style={styles.saveButtonText}>
+                    {isEditing ? 'Save Changes' : 'Add Item'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    padding: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
-    padding: 15,
-    backgroundColor: 'white',
+    color: '#1e293b',
   },
   addButton: {
-    backgroundColor: '#007bff',
-    padding: 15,
+    backgroundColor: '#3b82f6',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
     alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   addButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '600',
   },
-  emptyListText: {
-    textAlign: 'center',
-    marginTop: 50,
-    color: '#888',
+  listContainer: {
+    flexGrow: 1,
+    paddingBottom: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 18,
+    color: '#64748b',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  emptySubText: {
+    fontSize: 14,
+    color: '#94a3b8',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  input: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    fontSize: 16,
+    color: '#1e293b',
+  },
+  halfInput: {
+    flex: 1,
+  },
+  notesInput: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginTop: 8,
+  },
+  modalButton: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#f1f5f9',
+  },
+  saveButton: {
+    backgroundColor: '#3b82f6',
+  },
+  cancelButtonText: {
+    color: '#64748b',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

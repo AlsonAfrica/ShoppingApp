@@ -1,170 +1,135 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  StyleSheet 
-} from 'react-native';
-import { useDispatch } from 'react-redux';
-import { 
-  deleteItem, 
-  togglePurchased 
-} from '../redux/slices/shoppingListSlice';
-import Toast from 'react-native-toast-message';
-import { Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
-// ITEM LIST CHECKBOX
-const Checkbox = ({ checked }) => (
-  <View style={[
-    styles.checkbox, 
-    checked && styles.checkedCheckbox
-  ]}>
-    {checked && <Text style={styles.checkmark}>✓</Text>}
-  </View>
-);
-
-// RECEIVED PROPS
-const ShoppingListItem = ({ item, onEdit }) => {
-  const dispatch = useDispatch();
-
-  const handleTogglePurchased = () => {
-    dispatch(togglePurchased(item.id));
-    
-  };
-
-  const handleDelete = () => {
-    Alert.alert(
-      'Confirm Deletion',
-      `Are you sure you want to delete ${item.name}?`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            // Dispatch the delete action
-            dispatch(deleteItem(item.id));
-  
-            // Show the success toast
-            Toast.show({
-              type: 'success',
-              text1: 'Item Deleted',
-              text2: `Item ${item.name} deleted successfully.`,
-              position: 'top',
-            });
-  
-            // Optionally, you can also save the updated list to AsyncStorage
-            // saveToStorage();
-          },
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-  
-
+const ShoppingItem = ({ item, onDelete, onEdit }) => {
   return (
-    <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.itemContent}
-        onPress={handleTogglePurchased}
-      >
-        <Checkbox checked={item.purchased} />
-        <Text 
-          style={[
-            styles.itemText, 
-            item.purchased && styles.purchasedItem
-          ]}
-        >
-          {item.name}
-        </Text>
-        <Text style={styles.quantityText}>
-          Qty: {item.quantity}
-        </Text>
-      </TouchableOpacity>
-      
-      <View style={styles.actionContainer}>
-        <TouchableOpacity 
-          style={styles.editButton}
-          onPress={onEdit}
-        >
-          <Text style={styles.buttonText}>Edit</Text>
-        </TouchableOpacity>
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.pressed,
+        { borderLeftColor: item.priorityColor }
+      ]}
+    >
+      <View style={styles.content}>
+        <View style={styles.details}>
+          <Text style={styles.itemName}>{item.name}</Text>
+          <View style={styles.infoContainer}>
+            <View style={styles.infoItem}>
+              <Feather name="hash" size={14} color="#666" />
+              <Text style={styles.infoText}>{item.quantity}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Feather name="dollar-sign" size={14} color="#666" />
+              <Text style={styles.infoText}>
+                {item.price ? item.price.toFixed(2) : 'N/A'}
+              </Text>
+            </View>
+          </View>
+          {item.notes && (
+            <View style={styles.notes}>
+              <Feather name="file-text" size={14} color="#666" />
+              <Text style={styles.notesText} numberOfLines={2}>
+                {item.notes}
+              </Text>
+            </View>
+          )}
+        </View>
         
-        <TouchableOpacity 
-          style={styles.deleteButton}
-          onPress={handleDelete}
-        >
-          <Text style={styles.buttonText}>Delete</Text>
-        </TouchableOpacity>
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={[styles.button, styles.editButton]}
+            onPress={() => onEdit(item.id, item.name, item.quantity, item.price, item.priorityColor, item.notes)}
+          >
+            <Feather name="edit-2" size={16} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.deleteButton]}
+            onPress={() => onDelete(item.id)}
+          >
+            <Feather name="trash-2" size={16} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginVertical: 6,
+    marginHorizontal: 16,
+    borderLeftWidth: 4,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  pressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  content: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: 'white',
+    padding: 16,
   },
-  itemContent: {
+  details: {
     flex: 1,
+    marginRight: 16,
+  },
+  itemName: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between'
+    marginRight: 16,
   },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#007bff',
-    marginRight: 10,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  checkedCheckbox: {
-    backgroundColor: '#007bff'
-  },
-  checkmark: {
-    color: 'white',
-    fontSize: 16
-  },
-  itemText: {
-    fontSize: 16,
-    color: '#333',
-    flex: 1,
-    marginRight: 10
-  },
-  purchasedItem: {
-    textDecorationLine: 'line-through',
-    color: '#888'
-  },
-  quantityText: {
+  infoText: {
+    marginLeft: 4,
     fontSize: 14,
-    color: '#666'
+    color: '#666',
   },
-  actionContainer: {
-    flexDirection: 'row'
+  notes: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  notesText: {
+    marginLeft: 4,
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+  },
+  actions: {
+    justifyContent: 'center',
+    gap: 8,
+  },
+  button: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   editButton: {
-    marginRight: 10,
-    padding: 5
+    backgroundColor: '#4CAF50',
   },
   deleteButton: {
-    padding: 5
+    backgroundColor: '#FF5252',
   },
-  buttonText: {
-    color: '#007bff',
-    fontWeight: '600'
-  }
 });
 
-export default ShoppingListItem;
+export default ShoppingItem;
