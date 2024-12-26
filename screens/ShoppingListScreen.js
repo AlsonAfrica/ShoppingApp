@@ -14,6 +14,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { addItem, updateItem, deleteItem, toggleItemCompleted, setItems } from '../redux/ShoppingListSlice';
 import { saveItemsToStorage, getItemsFromStorage } from '../utils/asyncStorageHelpers';
 import ShoppingItem from '../Components/ShoppingItem';
+import Toast from 'react-native-toast-message';
 
 const ShoppingListScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -54,6 +55,11 @@ const ShoppingListScreen = () => {
       );
       setIsModalVisible(false);
       resetForm();
+      Toast.show({
+        type: 'success',
+        text1: 'Created',
+        text2: `Item Created Successfully `
+      });
     }
   };
 
@@ -66,6 +72,7 @@ const ShoppingListScreen = () => {
     setNotes(notes);
     setIsEditing(true);
     setIsModalVisible(true);
+   
   };
 
   const handleSaveEdit = () => {
@@ -83,11 +90,21 @@ const ShoppingListScreen = () => {
       setIsModalVisible(false);
       resetForm();
       setIsEditing(false);
+      Toast.show({
+        type: 'success',
+        text1: 'Editted',
+        text2: `Item Editted Successfully `
+      });
     }
   };
 
   const handleDeleteItem = (id) => {
     dispatch(deleteItem(id));
+    Toast.show({
+      type: 'success',
+      text1: 'Delete',
+      text2: `Item Deleted Successfully`
+    });
   };
 
   const handleToggleCompleted = (id) => {
@@ -112,6 +129,7 @@ const ShoppingListScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
+      <Toast/>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Shopping List</Text>
