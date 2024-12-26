@@ -12,8 +12,19 @@ const ShoppingItem = ({ item, onDelete, onEdit }) => {
       ]}
     >
       <View style={styles.content}>
+        <TouchableOpacity 
+            style={styles.checkbox}
+            onPress={() => {
+            }}
+          >
+            <View style={styles.checkboxInner}>
+              {item.completed && (
+                <Feather name="check" size={14} color="#4CAF50" />
+              )}
+            </View>
+          </TouchableOpacity>
         <View style={styles.details}>
-          <Text style={styles.itemName}>{item.name}</Text>
+          <Text style={[styles.itemName,item.completed && styles.completedText]}>{item.name}</Text>
           <View style={styles.infoContainer}>
             <View style={styles.infoItem}>
               <Feather name="hash" size={14} color="#666" />
@@ -129,6 +140,24 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: '#FF5252',
+  },
+  checkbox: {
+    marginRight: 12,
+    justifyContent: 'center',
+  },
+  checkboxInner: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  completedText: {
+    textDecorationLine: 'line-through',
+    color: '#666',
   },
 });
 

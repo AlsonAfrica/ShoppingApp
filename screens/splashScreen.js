@@ -12,8 +12,12 @@ const SplashScreen = ({ onAnimationComplete }) => {
         duration: 1000,
         useNativeDriver: true,
       }),
-      // Wait for a moment
-      Animated.delay(1500),
+      // Wait for a moment (use timing with duration 0 as a delay)
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: true,
+      }),
       // Fade out
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -23,7 +27,7 @@ const SplashScreen = ({ onAnimationComplete }) => {
     ]).start(() => {
       onAnimationComplete();
     });
-  }, []);
+  }, [fadeAnim, onAnimationComplete]);
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
