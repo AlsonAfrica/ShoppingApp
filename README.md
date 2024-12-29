@@ -42,10 +42,9 @@ npx expo start
 ```
 
 ## Project Structure
-```
+
 <img width="177" alt="image" src="https://github.com/user-attachments/assets/16a4b24e-1e87-4496-a861-8da06cda61b1" />
 
-```
 
 ## State Management
 
