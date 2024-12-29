@@ -23,12 +23,12 @@ A React-based shopping list application that uses Redux for state management and
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/shopping-list-app.git
+https://github.com/AlsonAfrica/ShoppingApp.git
 ```
 
 2. Navigate to the project directory:
 ```bash
-cd shopping-list-app
+cd ShoppingApp
 ```
 
 3. Install dependencies:
@@ -38,7 +38,7 @@ npm install
 
 4. Start the development server:
 ```bash
-npm start
+npx expo start
 ```
 
 ## Project Structure
