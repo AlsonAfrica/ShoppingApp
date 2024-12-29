@@ -16,7 +16,7 @@ A React-based shopping list application that uses Redux for state management and
 
 - React.js
 - Redux for state management
-- Local Storage for data persistence
+- Async Local Storage for data persistence
 - React Icons
 
 ## Installation
@@ -42,23 +42,9 @@ npx expo start
 ```
 
 ## Project Structure
-
 ```
-shopping-list-app/
-├── src/
-│   ├── components/
-│   │   ├── AddItem.js
-│   │   ├── ItemList.js
-│   │   ├── ItemCard.js
-│   │   └── EditItemModal.js
-│   ├── redux/
-│   │   ├── store.js
-│   │   └── shoppingListSlice.js
-│   ├── utils/
-│   │   └── localStorage.js
-│   ├── App.js
-│   └── index.js
-└── public/
+<img width="177" alt="image" src="https://github.com/user-attachments/assets/16a4b24e-1e87-4496-a861-8da06cda61b1" />
+
 ```
 
 ## State Management
@@ -87,7 +73,7 @@ The application uses Redux for state management with the following structure:
 
 ## Local Storage
 
-The application automatically saves the shopping list to local storage whenever changes are made. The data is loaded when the application starts, ensuring persistence across sessions.
+The application automatically saves the shopping list to Async Local Storage  whenever changes are made. The data is loaded when the application starts, ensuring persistence across sessions.
 
 ## Error Handling
 
@@ -102,7 +88,6 @@ The application includes comprehensive error handling for:
 Users receive visual feedback through:
 - Success messages for successful actions
 - Error messages for failed operations
-- Loading indicators for async operations
 - Visual confirmation for completed actions
 
 ## Contributing
@@ -119,6 +104,6 @@ This project is licensed under the MIT License - see the LICENSE.md file for det
 
 ## Contact
 
-Your Name - [your.email@example.com](mailto:your.email@example.com)
-Project Link: [https://github.com/yourusername/shopping-list-app](https://github.com/yourusername/shopping-list-app)
+Your Name - nhlakaniphoradebe337@gmail.com
+Project Link: https://github.com/AlsonAfrica/ShoppingApp.git
 
