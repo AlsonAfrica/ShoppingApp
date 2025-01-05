@@ -97,6 +97,9 @@ Users receive visual feedback through:
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+## Documentation
+- Please follow the link to the App Documentation: https://docs.google.com/document/d/1yf2tV-oo8jAfl2yB2SfdiV7yND1Qfg2JNIDJG8UFCmo/edit?usp=sharing
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details.
